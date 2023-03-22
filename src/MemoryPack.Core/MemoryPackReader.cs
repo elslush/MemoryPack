@@ -41,7 +41,7 @@ public ref partial struct MemoryPackReader
         this.bufferSource = sequence.IsSingleSegment ? ReadOnlySequence<byte>.Empty : sequence;
         var span = sequence.FirstSpan;
 #if NET7_0_OR_GREATER
-        this.bufferReference = ref MemoryMarshal.GetReference(span);
+        this.bufferReference = ref GetReference(span);
 #else
         this.bufferReference = span;
 #endif
@@ -57,7 +57,7 @@ public ref partial struct MemoryPackReader
     {
         this.bufferSource = ReadOnlySequence<byte>.Empty;
 #if NET7_0_OR_GREATER
-        this.bufferReference = ref MemoryMarshal.GetReference(buffer);
+        this.bufferReference = ref GetReference(buffer);
 #else
         this.bufferReference = buffer;
 #endif
@@ -116,7 +116,7 @@ public ref partial struct MemoryPackReader
             if (sizeHint <= bufferSource.FirstSpan.Length)
             {
 #if NET7_0_OR_GREATER
-                bufferReference = ref MemoryMarshal.GetReference(bufferSource.FirstSpan);
+                bufferReference = ref GetReference(bufferSource.FirstSpan);
                 bufferLength = bufferSource.FirstSpan.Length;
                 return ref bufferReference;
 #else
@@ -130,7 +130,7 @@ public ref partial struct MemoryPackReader
             bufferSource.Slice(0, sizeHint).CopyTo(rentBuffer);
             var span = rentBuffer.AsSpan(0, sizeHint);
 #if NET7_0_OR_GREATER
-            bufferReference = ref MemoryMarshal.GetReference(span);
+            bufferReference = ref GetReference(span);
             bufferLength = span.Length;
             return ref bufferReference;
 #else
@@ -183,7 +183,7 @@ public ref partial struct MemoryPackReader
 
         bufferSource = bufferSource.Slice(advancedCount + count);
 #if NET7_0_OR_GREATER
-        bufferReference = ref MemoryMarshal.GetReference(bufferSource.FirstSpan);
+        bufferReference = ref GetReference(bufferSource.FirstSpan);
 #else
         bufferReference = bufferSource.FirstSpan;
 #endif
@@ -227,7 +227,7 @@ public ref partial struct MemoryPackReader
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Dispose()
+    public readonly void Dispose()
     {
         if (rentBuffer != null)
         {
@@ -428,7 +428,7 @@ public ref partial struct MemoryPackReader
                 {
                     str = string.Create(utf16Length, ((IntPtr)p, utf8Length), static (dest, state) =>
                     {
-                        var src = MemoryMarshal.CreateSpan(ref Unsafe.AsRef<byte>((byte*)state.Item1), state.Item2);
+                        var src = MemoryMarshal.CreateSpan(ref Unsafe.AsRef<byte>((byte*)state.Item1), state.utf8Length);
                         var status = Utf8.ToUtf16(src, dest, out var bytesRead, out var charsWritten, replaceInvalidSequences: false);
                         if (status != OperationStatus.Done)
                         {
@@ -870,7 +870,7 @@ public ref partial struct MemoryPackReader
 
             var byteCount = length * Unsafe.SizeOf<T>();
             ref var src = ref GetSpanReference(byteCount);
-            ref var dest = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)!);
+            ref var dest = ref Unsafe.As<T, byte>(ref GetReference(value)!);
             Unsafe.CopyBlockUnaligned(ref dest, ref src, (uint)byteCount);
 
             Advance(byteCount);
