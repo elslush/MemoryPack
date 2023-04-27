@@ -3,10 +3,10 @@
     "MemoryPack.AspNetCoreMvcFormatter": {
       "commandName": "Project",
       "launchBrowser": true,
+      "applicationUrl": "https://localhost:50975;http://localhost:50976",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:50975;http://localhost:50976"
+      }
     }
   }
 }

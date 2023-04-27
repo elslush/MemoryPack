@@ -34,7 +34,7 @@ public ref partial struct MemoryPackWriter
     const int DepthLimit = 1000;
 
 #if NET7_0_OR_GREATER
-    ref IBufferWriter<byte> bufferWriter;
+    public ref IBufferWriter<byte> bufferWriter;
     ref byte bufferReference;
 #else
     IBufferWriter<byte> bufferWriter;
@@ -342,7 +342,7 @@ public ref partial struct MemoryPackWriter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void WriteUtf8(string? value)
+    public void WriteUtf8(ReadOnlySpan<char> value)
     {
         if (value == null)
         {
@@ -358,19 +358,19 @@ public ref partial struct MemoryPackWriter
 
         // (int ~utf8-byte-count, int utf16-length, utf8-bytes)
 
-        var source = value.AsSpan();
+        //var source = value.AsSpan();
 
         // UTF8.GetMaxByteCount -> (length + 1) * 3
-        var maxByteCount = (source.Length + 1) * 3;
+        var maxByteCount = (value.Length + 1) * 3;
 
         ref var destPointer = ref GetSpanReference(maxByteCount + 8); // header
 
         // write utf16-length
-        Unsafe.WriteUnaligned(ref Unsafe.Add(ref destPointer, 4), source.Length);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref destPointer, 4), value.Length);
 
         var dest = MemoryMarshal.CreateSpan(ref Unsafe.Add(ref destPointer, 8), maxByteCount);
 #if NET7_0_OR_GREATER
-        var status = Utf8.FromUtf16(source, dest, out var _, out var bytesWritten, replaceInvalidSequences: false);
+        var status = Utf8.FromUtf16(value, dest, out var _, out var bytesWritten, replaceInvalidSequences: false);
         if (status != OperationStatus.Done)
         {
             MemoryPackSerializationException.ThrowFailedEncoding(status);

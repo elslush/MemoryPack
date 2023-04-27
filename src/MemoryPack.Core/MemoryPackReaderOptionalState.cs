@@ -17,7 +17,7 @@ public static class MemoryPackReaderOptionalStatePool
         return state;
     }
 
-    internal static void Return(MemoryPackReaderOptionalState state)
+    public static void Return(MemoryPackReaderOptionalState state)
     {
         state.Reset();
         queue.Enqueue(state);

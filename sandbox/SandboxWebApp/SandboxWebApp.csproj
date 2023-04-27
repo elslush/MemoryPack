@@ -27,6 +27,7 @@
         <!--<MemoryPackGenerator_TypeScriptEnableNullableTypes>true</MemoryPackGenerator_TypeScriptEnableNullableTypes>-->
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
     <ItemGroup>
         <ProjectReference Include="..\..\src\MemoryPack.AspNetCoreMvcFormatter\MemoryPack.AspNetCoreMvcFormatter.csproj" />
         <ProjectReference Include="..\..\src\MemoryPack.Core\MemoryPack.Core.csproj" />

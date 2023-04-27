@@ -20,7 +20,7 @@ public static class MemoryPackWriterOptionalStatePool
         return state;
     }
 
-    internal static void Return(MemoryPackWriterOptionalState state)
+    public static void Return(MemoryPackWriterOptionalState state)
     {
         state.Reset();
         queue.Enqueue(state);
